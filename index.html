@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#FBF7F0; --card:#FFFFFF; --ink:#2B2621; --sub:#6F655B; --line:#E7DFD3;
+    --shu:#E8663A; --egg:#F2B134; --matcha:#6E9B3A; --warn:#C2412D; --note:#B7791F; --good:#4F7F2A;
+    --chip:#F4EEE4; --shadow:0 1px 2px rgba(60,40,20,.08),0 4px 14px rgba(60,40,20,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+  .top{display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .logo{width:30px;height:30px;border-radius:50%;background:var(--shu);color:#fff;display:grid;place-items:center;font-weight:700}
+  h1{font-size:16px;margin:0;font-weight:700}
+  .stat{margin-left:auto;color:var(--sub);font-size:12px}
+  nav{display:flex;gap:4px;padding:0 12px;overflow-x:auto}
+  nav button{border:0;background:none;padding:10px 12px;font:inherit;color:var(--sub);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+  nav button.on{color:var(--ink);border-bottom-color:var(--shu);font-weight:700}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;align-items:center}
+  input[type=search],select,input[type=date]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);max-width:100%}
+  input[type=search]{flex:1 1 200px}
+  .count{color:var(--sub);font-size:12px}
+  main{padding:0 16px 40px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+  .card:hover{outline:2px solid var(--egg)}
+  .ph{aspect-ratio:1/1;background:var(--chip);display:grid;place-items:center;color:#B8AC9C;font-size:12px;overflow:hidden}
+  .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px}
+  .date{font-size:12px;color:var(--sub);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .name{font-weight:700;font-size:15px;line-height:1.4}
+  .chips{display:flex;flex-wrap:wrap;gap:4px}
+  .chip{background:var(--chip);border-radius:999px;padding:1px 8px;font-size:12px}
+  .chip.main{background:#FDE7DD}
+  .chip.staple{background:#FFF1CF}
+  .badge{font-size:11px;border-radius:4px;padding:0 5px;border:1px solid currentColor}
+  .b-warn{color:var(--warn)} .b-note{color:var(--note)} .b-good{color:var(--good)} .b-sub{color:var(--sub)}
+  .meta{font-size:12px;color:var(--sub)}
+  .empty{padding:40px;text-align:center;color:var(--sub)}
+  /* detail */
+  .ov{position:fixed;inset:0;background:rgba(30,20,10,.45);z-index:10;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px}
+  .ov.on{display:flex}
+  .sheet{background:#fff;border-radius:14px;max-width:880px;width:100%;box-shadow:var(--shadow)}
+  .sheet .hd{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .sheet .hd h2{margin:0;font-size:18px}
+  .x{margin-left:auto;border:0;background:var(--chip);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer}
+  .sheet .bd{padding:16px 18px;display:grid;gap:16px}
+  .photos{display:flex;gap:8px;overflow-x:auto}
+  .photos .ph{flex:0 0 260px;border-radius:10px}
+  table{border-collapse:collapse;width:100%}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}
+  th{color:var(--sub);font-weight:600;white-space:nowrap}
+  .cap{white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--sub)}
+  h3{font-size:14px;margin:0 0 6px}
+  .link{color:var(--shu);cursor:pointer;text-decoration:underline}
+  .bars .row{display:grid;grid-template-columns:minmax(120px,40%) 1fr 36px;gap:8px;align-items:center;font-size:13px;padding:2px 0}
+  .bars .track{background:var(--chip);border-radius:4px;height:10px}
+  .bars .fill{background:var(--egg);border-radius:4px;height:10px}
+  .fam{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:12px}
+  .fam h3{display:flex;gap:8px;align-items:baseline}
+  .fam .chip{cursor:pointer}
+  .fam .chip b{color:var(--shu);font-weight:700;margin-left:2px}
+  /* check */
+  .ck{display:grid;gap:12px;max-width:820px}
+  .ck .box{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:14px}
+  .ck label{display:block;font-size:12px;color:var(--sub);margin-bottom:2px}
+  .ck .rowf{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .ck select{width:100%}
+  .res li{margin:4px 0}
+  .sug .chip{cursor:pointer}
+  .loading{padding:60px;text-align:center;color:var(--sub)}
+  @media (max-width:520px){ .grid{grid-template-columns:repeat(2,1fr);gap:10px} .name{font-size:14px} .photos .ph{flex-basis:200px} }
+</style>
+<meta name="robots" content="noindex,nofollow">
+<title>つむぐ 献立DB</title>
+<script>
+// GitHub Pages 版：Apps Script のデータAPIから、ログイン情報を使わずに読み込む
+const API = 'https://script.google.com/macros/s/AKfycbxcfLv4E-zHPGfp1cTgAmfkLxZQTmUOpyILRYUOBmwpNwjY7EkySJQTAWFA1O5KfNAMmw/exec';
+const KEY = (() => {
+  let k = new URLSearchParams(location.hash.slice(1)).get('k') || '';
+  try { if (k) localStorage.setItem('tumug_k', k); else k = localStorage.getItem('tumug_k') || ''; } catch (e) {}
+  return k;
+})();
+async function callApi(params) {
+  const r = await fetch(API + '?' + new URLSearchParams({ ...params, k: KEY }), { credentials: 'omit' });
+  return r.json();
+}
+window.google = { script: { get run() {
+  let ok = () => {}, ng = () => {};
+  const r = {
+    withSuccessHandler(f) { ok = f; return r; },
+    withFailureHandler(f) { ng = f; return r; },
+    getData() {
+      callApi({ api: 'data' }).then(b => b.error
+        ? ng(new Error(b.error === 'forbidden' ? 'URLが正しくありません。共有されたURLをそのまま開いてください。' : b.error))
+        : ok(b.data)).catch(e => ng(new Error('通信できませんでした。電波の良いところで開き直してください。')));
+    },
+    getThumbs(ids, size) { callApi({ api: 'thumbs', ids: ids.join(','), size }).then(b => ok(b.thumbs || {})).catch(() => {}); }
+  };
+  return r;
+} } };
+</script>
+</head>
+<body>
+<header>
+  <div class="top"><div class="logo">つ</div><h1>つむぐ 献立DB</h1><span class="stat" id="stat"></span></div>
+  <nav id="tabs">
+    <button data-t="menus" class="on">献立</button>
+    <button data-t="dishes">料理</button>
+    <button data-t="sides">副菜の全体像</button>
+    <button data-t="check">組み合わせチェック</button>
+  </nav>
+</header>
+<div class="bar" id="bar"></div>
+<main id="main"><div class="loading">読み込み中…</div></main>
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const S = { data:null, tab:'menus', thumbs:{}, pending:new Set(), f:{} };
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const EGG = /卵|たまご|オムレツ/;
+
+// ---------- data ----------
+function load(){
+  google.script.run.withSuccessHandler(txt => { S.data = index(JSON.parse(txt)); render(); })
+    .withFailureHandler(e => $('#main').innerHTML = '<div class="empty">読み込みに失敗しました：' + esc(e.message) + '</div>')
+    .getData();
+}
+function index(d){
+  d.dishById = Object.fromEntries(d.dishes.map(x => [x['料理ID'], x]));
+  d.menuById = Object.fromEntries(d.menus.map(x => [x['献立ID'], x]));
+  d.itemsByMenu = {}; d.itemsByDish = {};
+  d.items.forEach(i => { (d.itemsByMenu[i['献立ID']] ||= []).push(i); (d.itemsByDish[i['料理ID']] ||= []).push(i); });
+  Object.values(d.itemsByMenu).forEach(a => a.sort((p,q) => p['順番'] - q['順番']));
+  d.photoId = Object.fromEntries(d.photos.filter(p => p['ドライブID']).map(p => [p['ファイル名'], p['ドライブID']]));
+  d.photosByMenu = {};
+  d.photos.forEach(p => { if (p['献立ID']) (d.photosByMenu[p['献立ID']] ||= []).push(p); });
+  d.reviewsByMenu = {};
+  d.reviews.forEach(r => (d.reviewsByMenu[r['献立ID']] ||= []).push(r));
+  d.menus.sort((a,b) => String(b['提供日']).localeCompare(String(a['提供日'])));
+  d.useCount = {}; d.lastUsed = {};
+  d.items.forEach(i => {
+    const id = i['料理ID'], dt = String(i['提供日']);
+    d.useCount[id] = (d.useCount[id] || 0) + 1;
+    if (!d.lastUsed[id] || dt > d.lastUsed[id]) d.lastUsed[id] = dt;
+  });
+  return d;
+}
+
+// ---------- thumbnails (lazy) ----------
+let io = null, queue = [], timer = null;
+function phHtml(file, size){
+  const id = S.data.photoId[file];
+  if (!file) return '<div class="ph">写真なし</div>';
+  if (!id) return '<div class="ph">写真未ひも付け</div>';
+  const key = id + '_' + (size||400);
+  const src = S.thumbs[key];
+  return `<div class="ph" data-id="${esc(id)}" data-size="${size||400}">${src ? `<img src="${src}" alt="">` : ''}</div>`;
+}
+function observe(){
+  if (io) io.disconnect();
+  io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target, id = el.dataset.id, size = +el.dataset.size, key = id + '_' + size;
+    io.unobserve(el);
+    if (S.thumbs[key]) { el.innerHTML = `<img src="${S.thumbs[key]}" alt="">`; return; }
+    if (S.pending.has(key)) return;
+    S.pending.add(key); queue.push([id, size]);
+    clearTimeout(timer); timer = setTimeout(flush, 80);
+  }), { rootMargin:'300px' });
+  document.querySelectorAll('.ph[data-id]').forEach(el => { if (!el.querySelector('img')) io.observe(el); });
+}
+function flush(){
+  const bySize = {};
+  queue.splice(0).forEach(([id,size]) => (bySize[size] ||= []).push(id));
+  Object.entries(bySize).forEach(([size, ids]) => {
+    for (let i = 0; i < ids.length; i += 12) {
+      const chunk = ids.slice(i, i+12);
+      google.script.run.withSuccessHandler(map => {
+        Object.entries(map).forEach(([id, url]) => {
+          S.thumbs[id + '_' + size] = url;
+          document.querySelectorAll(`.ph[data-id="${id}"][data-size="${size}"]`).forEach(el => el.innerHTML = `<img src="${url}" alt="">`);
+        });
+      }).getThumbs(chunk, +size);
+    }
+  });
+}
+
+// ---------- tabs ----------
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  S.tab = b.dataset.t; render();
+});
+function render(){
+  const d = S.data;
+  $('#stat').textContent = `献立 ${d.menus.length}件・料理 ${d.dishes.length}品`;
+  ({menus:renderMenus, dishes:renderDishes, sides:renderSides, check:renderCheck})[S.tab]();
+  observe();
+}
+function opts(list, cur, all='すべて'){ return `<option value="">${all}</option>` + list.map(v => `<option ${v===cur?'selected':''}>${esc(v)}</option>`).join(''); }
+const uniq = a => [...new Set(a.filter(v => v !== '' && v != null))];
+function bindBar(keys, fn){
+  keys.forEach(k => { const el = $('#f_' + k); if (el) el.addEventListener('input', () => { S.f[k] = el.value; fn(); observe(); }); });
+}
+
+// ---------- 献立 ----------
+function renderMenus(){
+  const d = S.data, f = S.f;
+  const months = uniq(d.menus.map(m => String(m['提供日']).slice(0,7)));
+  $('#bar').innerHTML = `
+    <input type="search" id="f_mq" placeholder="料理名・投稿文で検索" value="${esc(f.mq||'')}">
+    <select id="f_mm">${opts(months, f.mm, 'すべての月')}</select>
+    <select id="f_mk">${opts(uniq(d.menus.map(m => m['注文区分'])), f.mk, 'すべての注文')}</select>
+    <select id="f_mg">${opts(['和','洋','中','韓','エスニック'], f.mg, '主菜のジャンル')}</select>
+    <span class="count" id="cnt"></span>`;
+  bindBar(['mq','mm','mk','mg'], listMenus); listMenus();
+}
+function listMenus(){
+  const d = S.data, f = S.f, q = (f.mq||'').trim();
+  const rows = d.menus.filter(m => {
+    if (f.mm && !String(m['提供日']).startsWith(f.mm)) return false;
+    if (f.mk && m['注文区分'] !== f.mk) return false;
+    const its = d.itemsByMenu[m['献立ID']] || [];
+    if (f.mg) { const main = d.dishById[m['主菜ID']]; if (!main || main['ジャンル'] !== f.mg) return false; }
+    if (q && !its.some(i => String(i['料理名']).includes(q)) && !String(m['元の投稿文']).includes(q) && !String(m['メニュー名']).includes(q)) return false;
+    return true;
+  });
+  $('#cnt').textContent = rows.length + '件';
+  $('#main').innerHTML = rows.length ? '<div class="grid">' + rows.map(menuCard).join('') + '</div>' : '<div class="empty">該当する献立がありません</div>';
+  $('#main').onclick = e => { const c = e.target.closest('[data-menu]'); if (c) openMenu(c.dataset.menu); };
+}
+function menuCard(m){
+  const its = S.data.itemsByMenu[m['献立ID']] || [];
+  const side = its.filter(i => i['役割'] === '副菜').map(i => `<span class="chip">${esc(i['料理名'])}</span>`).join('');
+  const staple = its.filter(i => i['役割'] === '主食').map(i => `<span class="chip staple">${esc(i['料理名'])}</span>`).join('');
+  return `<div class="card" data-menu="${esc(m['献立ID'])}">${phHtml(m['代表写真'])}
+    <div class="body">
+      <div class="date">${esc(m['提供日'])}（${esc(m['曜日'])}）${badges(m)}</div>
+      <div class="name">${esc(m['メニュー名'])}</div>
+      <div class="chips">${staple}${side}</div>
+    </div></div>`;
+}
+function badges(m){
+  let b = '';
+  if (m['注文区分'] && m['注文区分'] !== '通常') b += `<span class="badge b-good">${esc(m['注文区分'])}</span>`;
+  if (m['日付の確度'] === '概算') b += '<span class="badge b-sub">日付概算</span>';
+  if (String(m['要確認']).includes('料理名') || String(m['要確認']).includes('副菜')) b += '<span class="badge b-note">料理名要確認</span>';
+  const its = S.data.itemsByMenu[m['献立ID']] || [];
+  if (its.some(i => String((S.data.dishById[i['料理ID']]||{})['豚・豚由来']) === 'あり')) b += '<span class="badge b-warn">豚</span>';
+  return b;
+}
+function openMenu(id){
+  const d = S.data, m = d.menuById[id], its = d.itemsByMenu[id] || [];
+  const ph = (d.photosByMenu[id] || []).map(p => phHtml(p['ファイル名'], 800)).join('');
+  const rv = d.reviewsByMenu[id] || [];
+  $('#sheet').innerHTML = `
+    <div class="hd"><div><div class="date">${esc(m['提供日'])}（${esc(m['曜日'])}）・${esc(m['注文区分'])}${m['注文先'] ? '・' + esc(m['注文先']) : ''}・${esc(m['対象'])} ${badges(m)}</div><h2>${esc(m['メニュー名'])}</h2></div><button class="x" onclick="closeOv()">×</button></div>
+    <div class="bd">
+      <div class="photos">${ph || '<div class="ph">写真なし</div>'}</div>
+      <div><h3>内容</h3><table><tr><th>役割</th><th>料理</th><th>当日メモ</th><th>盛り量</th><th>出どころ</th></tr>
+        ${its.map(i => `<tr><td>${esc(i['役割'])}</td><td><span class="link" onclick="openDish('${esc(i['料理ID'])}')">${esc(i['料理名'])}</span></td><td>${esc(i['当日メモ'])}</td><td>${esc(i['1食の盛り量'])}${esc(i['単位'])}</td><td>${esc(i['出どころ'])}</td></tr>`).join('')}
+      </table></div>
+      ${checkHtml(its.map(i => ({id:i['料理ID'], role:i['役割']})), String(m['提供日']), id)}
+      <div><h3>記録</h3><table>
+        <tr><th>日付の根拠</th><td>${esc(m['日付の根拠'])}（${esc(m['日付の確度'])}）</td></tr>
+        <tr><th>要確認</th><td>${esc(m['要確認']) || '－'}</td></tr>
+        <tr><th>備考</th><td>${esc(m['備考']) || '－'}</td></tr>
+        <tr><th>評価</th><td>${rv.length ? rv.map(r => `${esc(r['評価（1〜5）'])} ${esc(r['残った量'])} ${esc(r['生徒の声'])} ${esc(r['スタッフの声'])}`).join('<br>') : '未記録（評価シートに献立IDで記録）'}</td></tr>
+        <tr><th>献立ID</th><td>${esc(m['献立ID'])}</td></tr>
+      </table></div>
+      ${m['元の投稿文'] ? `<div><h3>元の投稿文</h3><div class="cap">${esc(m['元の投稿文'])}</div></div>` : ''}
+    </div>`;
+  openOv();
+}
+
+// ---------- 料理 ----------
+function renderDishes(){
+  const d = S.data, f = S.f;
+  $('#bar').innerHTML = `
+    <input type="search" id="f_dq" placeholder="料理名で検索" value="${esc(f.dq||'')}">
+    <select id="f_dk">${opts(['主菜','副菜','主食'], f.dk, 'すべての区分')}</select>
+    <select id="f_dg">${opts(['和','洋','中','韓','エスニック'], f.dg, 'すべてのジャンル')}</select>
+    <select id="f_dm">${opts(uniq(d.dishes.map(x => x['調理法'])), f.dm, 'すべての調理法')}</select>
+    <select id="f_dp">${opts(['あり','要確認','なし・空欄'], f.dp, '豚・豚由来')}</select>
+    <select id="f_ds">${['回数が多い順','最近出した順','しばらく出していない順','名前順'].map(v => `<option ${v===f.ds?'selected':''}>${v}</option>`).join('')}</select>
+    <span class="count" id="cnt"></span>`;
+  bindBar(['dq','dk','dg','dm','dp','ds'], listDishes); listDishes();
+}
+function listDishes(){
+  const d = S.data, f = S.f, q = (f.dq||'').trim();
+  let rows = d.dishes.filter(x => {
+    if (f.dk && x['区分'] !== f.dk) return false;
+    if (f.dg && x['ジャンル'] !== f.dg) return false;
+    if (f.dm && x['調理法'] !== f.dm) return false;
+    const pk = String(x['豚・豚由来']||'');
+    if (f.dp === 'あり' && pk !== 'あり') return false;
+    if (f.dp === '要確認' && !pk.startsWith('要確認')) return false;
+    if (f.dp === 'なし・空欄' && (pk === 'あり' || pk.startsWith('要確認'))) return false;
+    if (q && !String(x['料理名']).includes(q) && !String(x['別名']).includes(q) && !String(x['系統']).includes(q)) return false;
+    return true;
+  });
+  const cnt = x => d.useCount[x['料理ID']] || 0, last = x => d.lastUsed[x['料理ID']] || '';
+  const s = f.ds || '回数が多い順';
+  rows.sort(s === '最近出した順' ? (a,b) => last(b).localeCompare(last(a)) : s === 'しばらく出していない順' ? (a,b) => last(a).localeCompare(last(b))
+    : s === '名前順' ? (a,b) => String(a['料理名']).localeCompare(String(b['料理名']), 'ja') : (a,b) => cnt(b) - cnt(a));
+  $('#cnt').textContent = rows.length + '品';
+  $('#main').innerHTML = rows.length ? '<div class="grid">' + rows.map(x => `
+    <div class="card" data-dish="${esc(x['料理ID'])}">${phHtml(x['代表写真'])}
+      <div class="body">
+        <div class="date"><span class="chip ${x['区分']==='主菜'?'main':x['区分']==='主食'?'staple':''}">${esc(x['区分'])}</span>${esc(x['ジャンル'])}・${esc(x['調理法'])} ${pkBadge(x)}</div>
+        <div class="name">${esc(x['料理名'])}</div>
+        <div class="meta">${cnt(x)}回・最後 ${esc(last(x) || '－')}</div>
+      </div></div>`).join('') + '</div>' : '<div class="empty">該当する料理がありません</div>';
+  $('#main').onclick = e => { const c = e.target.closest('[data-dish]'); if (c) openDish(c.dataset.dish); };
+}
+function pkBadge(x){
+  const pk = String(x['豚・豚由来']||'');
+  return pk === 'あり' ? '<span class="badge b-warn">豚</span>' : pk.startsWith('要確認') ? '<span class="badge b-note">豚?</span>' : '';
+}
+function together(dishId){
+  const d = S.data, cnt = {};
+  (d.itemsByDish[dishId] || []).forEach(i => (d.itemsByMenu[i['献立ID']] || []).forEach(j => {
+    if (j['料理ID'] !== dishId) cnt[j['料理ID']] = (cnt[j['料理ID']] || 0) + 1;
+  }));
+  return Object.entries(cnt).sort((a,b) => b[1]-a[1]);
+}
+function barsHtml(list, max=10){
+  if (!list.length) return '<div class="meta">記録なし</div>';
+  const top = list.slice(0,max), m = top[0][1];
+  return '<div class="bars">' + top.map(([id,n]) => `<div class="row"><span class="link" onclick="openDish('${esc(id)}')">${esc((S.data.dishById[id]||{})['料理名']||id)}</span><div class="track"><div class="fill" style="width:${n/m*100}%"></div></div><span>${n}</span></div>`).join('') + '</div>';
+}
+function openDish(id){
+  const d = S.data, x = d.dishById[id]; if (!x) return;
+  const uses = (d.itemsByDish[id] || []).slice().sort((a,b) => String(b['提供日']).localeCompare(String(a['提供日'])));
+  const tg = together(id);
+  const mains = tg.filter(([j]) => (d.dishById[j]||{})['区分'] === '主菜');
+  const sides = tg.filter(([j]) => (d.dishById[j]||{})['区分'] !== '主菜');
+  const attrs = ['系統','別名','ジャンル','主材料','調理法','味の系統','色','前日仕込み','豚・豚由来','魚介の後乗せ','アレルゲン','使う機器','所要時間（分）','状態','属性の状態','版','確認者','確認日','メモ'];
+  $('#sheet').innerHTML = `
+    <div class="hd"><div><div class="date"><span class="chip">${esc(x['区分'])}</span>${esc(x['料理ID'])} ${pkBadge(x)}</div><h2>${esc(x['料理名'])}</h2></div><button class="x" onclick="closeOv()">×</button></div>
+    <div class="bd">
+      <div class="photos">${uses.slice(0,6).map(u => phHtml((d.menuById[u['献立ID']]||{})['代表写真'], 800)).join('') || '<div class="ph">写真なし</div>'}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+        <div><h3>${x['区分']==='主菜' ? '一緒に出した副菜' : '一緒に出した料理（副菜・主食）'}</h3>${barsHtml(sides)}</div>
+        <div><h3>一緒に出した主菜</h3>${barsHtml(mains)}</div>
+      </div>
+      <div><h3>属性</h3><table>${attrs.map(a => `<tr><th>${a}</th><td>${esc(x[a]) || '－'}</td></tr>`).join('')}</table></div>
+      <div><h3>出した日（${uses.length}回）</h3><div class="chips">${uses.map(u => `<span class="chip link" onclick="openMenu('${esc(u['献立ID'])}')">${esc(u['提供日'])}${u['当日メモ'] ? '・' + esc(u['当日メモ']) : ''}</span>`).join('')}</div></div>
+    </div>`;
+  openOv();
+}
+
+// ---------- 副菜の全体像 ----------
+function renderSides(){
+  const d = S.data;
+  $('#bar').innerHTML = `<span class="count">副菜を系統ごとにまとめています。数字は出した回数（Instagram の記録分）。名前を押すと詳細</span>`;
+  const fam = {};
+  d.dishes.filter(x => x['区分'] === '副菜').forEach(x => (fam[x['系統']] ||= []).push(x));
+  const list = Object.entries(fam).map(([k, xs]) => [k, xs, xs.reduce((s,x) => s + (d.useCount[x['料理ID']]||0), 0)]).sort((a,b) => b[2]-a[2]);
+  $('#main').innerHTML = list.map(([k, xs, n]) => `<div class="fam"><h3>${esc(k)} <span class="meta">${xs.length}品・${n}回</span></h3><div class="chips">${
+    xs.sort((a,b) => (d.useCount[b['料理ID']]||0) - (d.useCount[a['料理ID']]||0)).map(x => `<span class="chip" onclick="openDish('${esc(x['料理ID'])}')">${esc(x['料理名'])}<b>${d.useCount[x['料理ID']]||0}</b></span>`).join('')}</div></div>`).join('');
+  $('#main').onclick = null;
+}
+
+// ---------- 組み合わせチェック ----------
+function rule(id){ const r = S.data.rules.find(r => r['ルールID'] === id); return r && (r['有効'] === true || String(r['有効']).toUpperCase() === 'TRUE') ? r : null; }
+function evaluate(sel, date, selfMenuId){
+  const d = S.data, out = [];
+  const ds = sel.map(s => ({...s, x:d.dishById[s.id]})).filter(s => s.x);
+  const main = ds.find(s => s.role === '主菜'), sides = ds.filter(s => s.role !== '主菜');
+  const add = (r, msg) => out.push({lv:r['重さ'], msg:`${r['内容']}：${msg}`});
+  let r;
+  if ((r = rule('R01'))) ds.filter(s => s.x['豚・豚由来'] === 'あり').forEach(s => add(r, s.x['料理名']));
+  if ((r = rule('R02'))) ds.filter(s => String(s.x['豚・豚由来']).startsWith('要確認')).forEach(s => add(r, s.x['料理名']));
+  if ((r = rule('R03'))) ds.filter(s => String(s.x['魚介の後乗せ']).startsWith('該当')).forEach(s => add(r, s.x['料理名']));
+  if (main && (r = rule('R04'))) sides.filter(s => s.x['調理法'] && s.x['調理法'] === main.x['調理法']).forEach(s => add(r, `${s.x['料理名']}（${s.x['調理法']}）`));
+  if (main && (r = rule('R05'))) sides.filter(s => s.x['味の系統'] && s.x['味の系統'] === main.x['味の系統']).forEach(s => add(r, `${s.x['料理名']}（${s.x['味の系統']}）`));
+  if ((r = rule('R06'))) { const c = {}; sides.filter(s => !EGG.test(s.x['料理名'])).forEach(s => s.x['調理法'] && (c[s.x['調理法']] = (c[s.x['調理法']]||0)+1));
+    Object.entries(c).filter(([,n]) => n >= (+r['値']||2)).forEach(([k,n]) => add(r, `${k}が${n}品`)); }
+  if ((r = rule('R07'))) { const n = ds.filter(s => String(s.x['色']).includes('茶・黒')).length; if (n >= (+r['値']||3)) add(r, `${n}品`); }
+  if ((r = rule('R08'))) { const n = ds.filter(s => String(s.x['前日仕込み']).startsWith('可')).length; if (n >= (+r['値']||3)) add(r, `${n}品`); }
+  if (date) {
+    const near = (id, days) => (d.itemsByDish[id]||[]).filter(i => i['献立ID'] !== selfMenuId).map(i => String(i['提供日'])).filter(t => { const g = (new Date(date) - new Date(t)) / 864e5; return g > 0 && g <= days; }).sort().pop();
+    if (main && (r = rule('R09'))) { const t = near(main.id, +r['値']||14); if (t) add(r, `${main.x['料理名']}（${t}）`); }
+    if ((r = rule('R10'))) sides.filter(s => !EGG.test(s.x['料理名'])).forEach(s => { const t = near(s.id, +r['値']||7); if (t) add(r, `${s.x['料理名']}（${t}）`); });
+  }
+  if ((r = rule('R11'))) ds.filter(s => String(s.x['調理法']).startsWith('揚げ')).forEach(s => add(r, s.x['料理名']));
+  const ids = new Set(ds.map(s => s.id));
+  d.pairs.forEach(p => {
+    if (!ids.has(p['料理ID_A']) || !ids.has(p['料理ID_B'])) return;
+    if (p['種類'] === 'NG' && (r = rule('R12'))) add(r, `${p['料理名A']}×${p['料理名B']} ${p['理由']||''}`);
+    if (p['種類'] === '鉄板' && (r = rule('R13'))) add(r, `${p['料理名A']}×${p['料理名B']}`);
+  });
+  return out;
+}
+function checkHtml(sel, date, selfId){
+  const res = evaluate(sel, date, selfId);
+  const cls = {警告:'b-warn', 注意:'b-note', 良い:'b-good'};
+  return `<div class="res"><h3>組み合わせの確認</h3>${res.length ? '<ul style="margin:0;padding-left:18px">' + res.map(x => `<li><span class="badge ${cls[x.lv]||'b-sub'}">${esc(x.lv)}</span> ${esc(x.msg)}</li>`).join('') + '</ul>' : '<div class="meta">ルールに当たる点はありません</div>'}</div>`;
+}
+function renderCheck(){
+  const d = S.data, f = S.f;
+  const byName = (a,b) => String(a['料理名']).localeCompare(String(b['料理名']), 'ja');
+  const mains = d.dishes.filter(x => x['区分'] === '主菜').sort(byName), sides = d.dishes.filter(x => x['区分'] !== '主菜').sort(byName);
+  const o = (list, cur) => '<option value="">－</option>' + list.map(x => `<option value="${esc(x['料理ID'])}" ${x['料理ID']===cur?'selected':''}>${esc(x['料理名'])}</option>`).join('');
+  f.cs ||= ['','','',''];
+  $('#bar').innerHTML = `<span class="count">主菜と副菜を選ぶと、相性ルール（シート「相性ルール」）で確認し、過去の組み合わせから候補を出します</span>`;
+  $('#main').innerHTML = `<div class="ck">
+    <div class="box"><div class="rowf">
+      <div><label>提供予定日</label><input type="date" id="c_date" value="${esc(f.cd||new Date().toISOString().slice(0,10))}"></div>
+      <div><label>主菜</label><select id="c_main">${o(mains, f.cm)}</select></div>
+      ${[0,1,2,3].map(i => `<div><label>副菜${i+1}</label><select class="c_side" data-i="${i}">${o(sides, f.cs[i])}</select></div>`).join('')}
+    </div></div>
+    <div class="box" id="c_res"></div>
+    <div class="box sug" id="c_sug"></div>
+  </div>`;
+  const upd = () => {
+    f.cd = $('#c_date').value; f.cm = $('#c_main').value;
+    document.querySelectorAll('.c_side').forEach(s => f.cs[+s.dataset.i] = s.value);
+    const sel = [];
+    if (f.cm) sel.push({id:f.cm, role:'主菜'});
+    f.cs.filter(Boolean).forEach(id => sel.push({id, role:'副菜'}));
+    $('#c_res').innerHTML = sel.length ? checkHtml(sel, f.cd) : '<div class="meta">主菜と副菜を選んでください</div>';
+    $('#c_sug').innerHTML = suggest(f.cm, f.cd, new Set(f.cs.filter(Boolean)));
+  };
+  $('#main').oninput = upd; $('#main').onclick = e => {
+    const c = e.target.closest('[data-add]'); if (!c) return;
+    const i = f.cs.findIndex(v => !v); if (i < 0) return;
+    f.cs[i] = c.dataset.add; renderCheck();
+  };
+  upd();
+}
+function suggest(mainId, date, chosen){
+  const d = S.data;
+  if (!mainId) return '<div class="meta">主菜を選ぶと、副菜の候補が出ます</div>';
+  const main = d.dishById[mainId];
+  const days = id => { const t = d.lastUsed[id]; return t ? Math.round((new Date(date) - new Date(t)) / 864e5) : 9999; };
+  const hist = together(mainId).filter(([id]) => (d.dishById[id]||{})['区分'] !== '主菜' && !chosen.has(id));
+  const fresh = d.dishes.filter(x => x['区分'] === '副菜' && !chosen.has(x['料理ID']) && !EGG.test(x['料理名'])
+      && x['調理法'] !== main['調理法'] && x['味の系統'] !== main['味の系統'] && x['豚・豚由来'] !== 'あり' && days(x['料理ID']) > 21)
+    .sort((a,b) => (d.useCount[b['料理ID']]||0) - (d.useCount[a['料理ID']]||0)).slice(0, 16);
+  const chip = (id, extra) => `<span class="chip" data-add="${esc(id)}">${esc((d.dishById[id]||{})['料理名'])}${extra ? '・' + extra : ''}</span>`;
+  return `<h3>この主菜と実際に組んだ副菜（押すと追加）</h3><div class="chips">${hist.length ? hist.slice(0,12).map(([id,n]) => chip(id, n + '回')).join('') : '<span class="meta">記録なし</span>'}</div>
+    <h3 style="margin-top:12px">しばらく出していない副菜で、主菜と調理法・味が重ならないもの</h3><div class="chips">${fresh.map(x => chip(x['料理ID'], (d.lastUsed[x['料理ID']]||'').slice(0,7))).join('') || '<span class="meta">該当なし</span>'}</div>`;
+}
+
+// ---------- overlay ----------
+function openOv(){ $('#ov').classList.add('on'); observe(); }
+function closeOv(){ $('#ov').classList.remove('on'); }
+$('#ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOv(); });
+
+load();
+</script>
+</body>
+</html>
